@@ -55,20 +55,6 @@ const Header = () => {
             <span className='absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500'></span>
           </a>
 
-          <button className='relative overflow-hidden border-2 border-blue-400/30 hover:border-blue-300 rounded-full flex items-center justify-center gap-3 px-7 py-3.5 text-white font-medium text-base transition-all duration-300 hover:shadow-lg group'>
-            <a
-              href="https://sahilfullstackportfolio.netlify.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className='relative z-10 flex items-center gap-2'
-            >
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 text-cyan-300' viewBox='0 0 20 20' fill='currentColor'>
-                <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z' clipRule='evenodd' />
-              </svg>
-              My Portfolio
-            </a>
-            <span className='absolute inset-0 bg-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></span>
-          </button>
         </div>
 
         {/* Stats */}

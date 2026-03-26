@@ -7,6 +7,16 @@ const connectDB = async () => {
     return;
   }
 
+  const mongoUri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB || "test";
+
+  if (!mongoUri) {
+    console.error(
+      '❌ Missing MONGODB_URI in environment variables. Create `Medical/server/.env` and set MONGODB_URI.'
+    );
+    process.exit(1);
+  }
+
   // Attach listeners only once
   mongoose.connection.once("connected", () => {
     console.log("✅ Database connected successfully");
@@ -25,7 +35,8 @@ const connectDB = async () => {
   });
 
   try {
-    await mongoose.connect(`${process.env.MONGODB_URI}/test`, {
+    await mongoose.connect(mongoUri, {
+      dbName,
       serverSelectionTimeoutMS: 5000, // Fail fast if can't reach server
       socketTimeoutMS: 45000,         // Drop idle sockets
       family: 4,                      // Use IPv4 (faster DNS)

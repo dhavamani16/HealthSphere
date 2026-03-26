@@ -4,8 +4,10 @@ const connectCloudinary = () => {
   const { CLOUDINARY_NAME, CLOUDINARY_API_KEY, CLOUDINARY_SECRET_KEY } = process.env;
 
   if (!CLOUDINARY_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_SECRET_KEY) {
-    console.error("❌ Missing Cloudinary configuration in environment variables.");
-    process.exit(1); // or throw an error if you want to handle it elsewhere
+    // Allow the server to run locally even if Cloudinary isn't configured.
+    // Profile image upload will fail until the env vars are provided.
+    console.warn("⚠️ Cloudinary not configured (missing CLOUDINARY_* env vars). Image upload disabled.");
+    return;
   }
 
   cloudinary.config({

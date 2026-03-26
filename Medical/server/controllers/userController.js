@@ -8,12 +8,24 @@ import { v2 as cloudinary } from 'cloudinary'
 import stripe from "stripe";
 import razorpay from 'razorpay';
 
-// Gateway Initialize
-const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
-const razorpayInstance = new razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-})
+// Gateway Initialize (allow server startup even if payments not configured)
+const hasCloudinaryConfig = Boolean(
+  process.env.CLOUDINARY_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_SECRET_KEY
+);
+
+const stripeInstance = process.env.STRIPE_SECRET_KEY
+  ? new stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
+
+const razorpayInstance =
+  process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+    ? new razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+      })
+    : null;
 
 // API to register user
 const registerUser = async (req, res) => {
@@ -109,6 +121,11 @@ const updateProfile = async (req, res) => {
 
         if (!name || !phone || !dob || !gender) {
             return res.json({ success: false, message: "Data Missing" })
+        }
+
+        // If Cloudinary isn't configured, allow profile updates without uploading an image.
+        if (imageFile && !hasCloudinaryConfig) {
+            return res.json({ success: false, message: "Cloudinary not configured on this server." })
         }
 
         await userModel.findByIdAndUpdate(userId, { name, phone, address: JSON.parse(address), dob, gender })
@@ -238,6 +255,9 @@ const listAppointment = async (req, res) => {
 // API to make payment of appointment using razorpay
 const paymentRazorpay = async (req, res) => {
     try {
+        if (!razorpayInstance) {
+            return res.json({ success: false, message: "Razorpay not configured on this server." })
+        }
 
         const { appointmentId } = req.body
         const appointmentData = await appointmentModel.findById(appointmentId)
@@ -267,6 +287,10 @@ const paymentRazorpay = async (req, res) => {
 // API to verify payment of razorpay
 const verifyRazorpay = async (req, res) => {
     try {
+        if (!razorpayInstance) {
+            return res.json({ success: false, message: "Razorpay not configured on this server." })
+        }
+
         const { razorpay_order_id } = req.body
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
 
@@ -286,6 +310,12 @@ const verifyRazorpay = async (req, res) => {
 // API to make payment of appointment using Stripe
 const paymentStripe = async (req, res) => {
     try {
+        if (!stripeInstance) {
+            return res.json({ success: false, message: "Stripe not configured on this server." })
+        }
+        if (!process.env.CURRENCY) {
+            return res.json({ success: false, message: "CURRENCY not configured on this server." })
+        }
 
         const { appointmentId } = req.body
         const { origin } = req.headers
